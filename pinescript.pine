@@ -1,0 +1,80 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RevenueTrader
+
+//@version=5
+indicator("Trend Trading Stategy", overlay = true)
+
+// defining EMAs Values
+var shorterEMALegth = 2
+var longerEMALength = 100
+
+detectingShortTermTrend(shorterEMALegth, longerEMALength) =>
+    // Generating EMAs
+    shorterEMA = ta.ema(close,shorterEMALegth)
+    longerEMA = ta.ema(close,longerEMALength)
+
+    // this will check cross ove above or below and if the shorterEMA is above the longerEMA, isBullish will become true
+    isBullish = shorterEMA > longerEMA ? true : false
+  
+    // return
+    isBullish
+
+generateLongSignal(shorterEMALegth,longerEMALength) =>
+    // Generating EMAs
+    shorterEMA = ta.ema(close[1],shorterEMALegth)
+    longerEMA = ta.ema(close,longerEMALength)
+
+    //This is the variable that place the trade entry few pips above entry
+    fewPIPsAbove = (high - low) * 0.3
+
+    // check for bullish cross
+    isBullishCross = if(ta.crossover(shorterEMA, longerEMA)) 
+        isBullishCross = 1
+
+    // this will plot a the entry line based on the beasih or bullish candle
+    if(isBullishCross)
+        if(close >  open)
+            line.new(x1 = bar_index, y1 = close + fewPIPsAbove, x2 = bar_index[2], y2=close + fewPIPsAbove, color = color.green, width = 2)
+        
+        if(close < open)
+            line.new(x1 = bar_index, y1 = open + fewPIPsAbove, x2 = bar_index[2], y2=open + fewPIPsAbove, color = color.green, width = 2)
+
+    // return
+    isBullishCross
+
+generateShortSignal(shorterEMALegth,longerEMALength) => 
+    // Generating EMAs
+    shorterEMA = ta.ema(close[1],shorterEMALegth)
+    longerEMA = ta.ema(close,longerEMALength)
+        
+    //This is the variable that place the trade entry few pips above entry
+    fewPIPsAbove = (high - low) * 0.3
+
+    // check for bullish cross
+    isBearCross = if(ta.crossover(longerEMA, shorterEMA)) 
+        isBearCross = 1
+
+    // this will plot a the entry line based on the beasih or bullish candle
+    if(isBearCross)
+        if(close >  open)
+            line.new(x1 = bar_index, y1 = open - fewPIPsAbove, x2 = bar_index[2], y2=open - fewPIPsAbove, color = color.red, width = 2)
+        
+        if(close < open)
+            line.new(x1 = bar_index, y1 = close - fewPIPsAbove, x2 = bar_index[2], y2=close - fewPIPsAbove, color = color.red, width = 2)
+
+    // return
+    isBearCross
+
+
+
+// All the Plotting
+
+// BarColor
+barcolor(detectingShortTermTrend(shorterEMALegth, longerEMALength) ? color.lime : color.red)
+
+// Plotting Long and Short Signal
+plotshape(generateLongSignal(shorterEMALegth,longerEMALength) == 1, style =  shape.arrowup, color = color.lime, size = size.tiny, location = location.belowbar)
+plotshape(generateShortSignal(shorterEMALegth,longerEMALength) == 1, style =  shape.arrowdown, color = color.red, size = size.tiny, location = location.abovebar)
+
+// plotting moving avaerage
+plot(ta.ema(close, 200), title="200 SMA", color=#FEDA15, linewidth=1)
