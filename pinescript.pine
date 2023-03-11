@@ -8,6 +8,14 @@ indicator("Trend Trading Stategy", overlay = true)
 var shorterEMALegth = 2
 var longerEMALength = 100
 
+// defining values for atr band inidcator
+var atrLength = 24
+var atrMultiplerUpper = 1
+var atrMultiplerLower = 1
+
+// getting atr value
+atr = ta.atr(atrLength)
+
 detectingShortTermTrend(shorterEMALegth, longerEMALength) =>
     // Generating EMAs
     shorterEMA = ta.ema(close,shorterEMALegth)
@@ -66,15 +74,15 @@ generateShortSignal(shorterEMALegth,longerEMALength) =>
     isBearCross
 
 
-
-// All the Plotting
-
+// Plotting
 // BarColor
 barcolor(detectingShortTermTrend(shorterEMALegth, longerEMALength) ? color.lime : color.red)
-
 // Plotting Long and Short Signal
-plotshape(generateLongSignal(shorterEMALegth,longerEMALength) == 1, style =  shape.arrowup, color = color.lime, size = size.tiny, location = location.belowbar)
-plotshape(generateShortSignal(shorterEMALegth,longerEMALength) == 1, style =  shape.arrowdown, color = color.red, size = size.tiny, location = location.abovebar)
-
+plotshape(generateLongSignal(shorterEMALegth,longerEMALength) == 1, style =  shape.circle, color = color.lime, size = size.tiny, location = location.belowbar)
+plotshape(generateShortSignal(shorterEMALegth,longerEMALength) == 1, style =  shape.circle, color = color.red, size = size.tiny, location = location.abovebar)
 // plotting moving avaerage
 plot(ta.ema(close, 200), title="200 SMA", color=#FEDA15, linewidth=1)
+
+// Plotting Atr Band
+plot(high + atr * atrMultiplerUpper, color = color.rgb(141, 140, 140, 56))
+plot(low - atr * atrMultiplerLower, color = color.rgb(141, 140, 140, 56))
